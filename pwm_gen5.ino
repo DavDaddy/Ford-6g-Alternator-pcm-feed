@@ -1,11 +1,14 @@
 /*
+ This sketch is intended to enable any Ford gen6, or Ford pcm type alternator to function and generate electricity without being attached to the vehicles pcm (Power train, Control Module), Ford speak for an ECU.
 
- Mimics the fade example but with an extra parameter for frequency. It should dim but with a flicker 
- because the frequency has been set low enough for the human eye to detect. This flicker is easiest to see when 
- the LED is moving with respect to the eye and when it is between about 20% - 60% brighness. The library 
- allows for a frequency range from 1Hz - 2MHz on 16 bit timers and 31Hz - 2 MHz on 8 bit timers. When 
- SetPinFrequency()/SetPinFrequencySafe() is called, a bool is returned which can be tested to verify the 
- frequency was actually changed.
+ The library allows for a frequency range from 1Hz - 2MHz on 16 bit timers and 31Hz - 2 MHz on 8 bit timers although all Ford pcm's to date run at 125hz. 
+
+When 
+
+ SetPinFrequency()/SetPinFrequencySafe()
+
+is called, a bool is returned which can be tested to verify the 
+frequency was actually changed.
  
  This example runs on mega and uno.
  */
@@ -13,10 +16,14 @@
 #include <PWM.h>
 
 //use pin 11 on the Mega instead, otherwise there is a frequency cap at 31 Hz
-int led = 9;                // the pin that the LED is attached to
-int brightness = 255;         // how bright the LED is
-int fadeAmount = 0;         // how many points to fade the LED by
-int32_t frequency = 125; //frequency (in Hz)
+int pcm = 9;               
+ //the pin that is attached to the Alternator
+int dutycycle = 242;         
+// Working with a scale from 0-255 where 0 = 0%, and 255 = 100% the acceptable input range is from 13-242 (5%-95%) for a generated 12v-16v
+int fadeAmount = 0;         
+//Not currently being used
+int32_t frequency = 125; 
+//Standard Ford pcm frequency (in Hz)
 
 void setup()
 {
@@ -24,21 +31,26 @@ void setup()
   InitTimersSafe(); 
 
   //sets the frequency for the specified pin
-  bool success = SetPinFrequencySafe(led, frequency);
+  bool success = SetPinFrequencySafe(pcm, frequency);
   
   //if the pin frequency was set successfully, turn pin 9 on
   if(success) {
     pinMode(9, OUTPUT);
-    digitalWrite(9, HIGH);    
+    digitalWrite(9, LOW);    
   }
 }
 
 void loop()
 {
   //use this functions instead of analogWrite on 'initialized' pins
-  pwmWrite(led, brightness);
+  pwmWrite(pcm, dutycycle);
 
-  brightness = 64;
+  dutycycle = 13;
+  //5% = 13 outputs 12v
+  //30% = 76 outputs 13v
+  //50% = 128 outputs 14v
+  //95% = 242 outputs 16v
+  
 
   delay(30);      
 }
