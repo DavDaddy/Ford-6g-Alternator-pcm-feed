@@ -36,7 +36,7 @@ void setup()
   //if the pin frequency was set successfully, turn pin 9 on
   if(success) {
     pinMode(9, OUTPUT);
-    digitalWrite(9, LOW);    
+    digitalWrite(9, HIGH);    
   }
 }
 
